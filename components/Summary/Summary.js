@@ -1,17 +1,26 @@
-import { StyleSheet, View,  Text,  } from 'react-native';
+import { StyleSheet, View,  Text, ScrollView,  } from 'react-native';
 import { ButtonGroup } from '@rneui/themed';
 
 
 export default function Summary( {route}) {
 
-  const {quizChoicesResults, quizPrompt} = route.params
-
+  const {quiz} = route.params
+  console.log(route.params)
   return (
     <View style = {styles.container}>
-      <Text>{quizPrompt}</Text>
-      <Text>{quizChoicesResults}</Text>
-    </View>
-    
+      <ScrollView>{quiz?.map((item, index)=> 
+      <View key = {index}>
+        <Text>{item.prompt}</Text>
+        <View>{item.choices?.map((choice , index) => 
+          <Text key = {index}>
+            {choice}
+          </Text>
+          )}
+        </View>
+      </View>
+      )}   
+    </ScrollView> 
+  </View>
   );
 }
 

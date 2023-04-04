@@ -87,7 +87,7 @@ export default function Questions({  navigation }) {
   const [currentQuestion, setCurrentQuestions] = useState(0)
   const [selectedIndex, setselectedIndex] = useState(-1)
   //make one question multiple answers
-  const [selectedIndexes, setSelectedIndexes] = useState([0, 2, ])
+  const [selectedIndexes, setSelectedIndexes] = useState([0, 2,])
   // score for summary page
   const [score, setScore] = useState(0)
   const [allQuestions, setAllQuestions] = useState([0])
@@ -102,8 +102,8 @@ export default function Questions({  navigation }) {
   else {
     //on the last question the button will go to summary 
     navigation.navigate('Summary',  {
-    quizPrompt: quizQuestions[currentQuestion].prompt,
-    quizChoicesResults: quizQuestions[currentQuestion].choices
+    quiz: quizQuestions,
+    
     }) 
     
   } 
@@ -112,7 +112,17 @@ export default function Questions({  navigation }) {
   //  setCurrentQuestions(currentQuestion)
   //} 
   }
-  
+
+  const selectAnswers = (index) => {
+    console.log(quizQuestions[currentQuestion].type)
+    if(quizQuestions[currentQuestion].type = 'multiple-choice'){
+    setSelectedIndexes(currentindexes  => [...
+    currentindexes, index])
+    } else {
+      selectedIndex(index)
+    }
+  }
+  console.log(selectedIndexes)
 
   const reset = () => {
     setCurrentQuestions(0)
@@ -135,7 +145,7 @@ export default function Questions({  navigation }) {
             buttons={quizQuestions[currentQuestion].choices}
             selectedIndex = {selectedIndex}
             testID = {'choices'}
-            onPress={(choice) => setselectedIndex(choice)}
+            onPress={(choice) => selectAnswers(choice)}
             buttonStyle = {styles.ButtonGroup}
             selectedButtonStyle = {styles.selectedButton}
             textStyle = {styles.ButtonGroupText}
