@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text } from "react-native";
 import { Button } from "react-native-elements";
 import { ButtonGroup } from "@rneui/themed";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const quizQuestions = [
   {
@@ -58,37 +58,48 @@ export default function Questions({ navigation }) {
   const [currentQuestion, setCurrentQuestions] = useState(0);
   const [selectedIndexes, setSelectedIndexes] = useState([0]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  // I inserted this to track when the quiz is over
+  const [ended, setEnded] = useState(false);
   // score for summary page
-  const [allQuestions, setAllQuestions] = useState([0]);
   const [answers, setAnswers] = useState([]);
 
-  const handleQuestions = () => {
-    if (currentQuestion + 1 < quizQuestions.length) {
-      //goes to the next question
-      setCurrentQuestions(currentQuestion + 1);
-      //prevents choice from being pre-selected
-      const selected =
-        quizQuestions[currentQuestion].type === "multiple-choice"
-          ? selectedIndexes
-          : selectedIndex;
-      const answer = {
-        index: currentQuestion,
-        selected,
-        corrected:
-          quizQuestions[currentQuestion].correct.toString() ==
-          selected.toString(),
-      };
-      setAnswers((answers) => [...answers, answer]);
-      setSelectedIndexes([]);
-      setSelectedIndex(-1);
-    } else {
-      //on the last question the button will go to summary
-      navigation.navigate("Summary", {
-        quiz: quizQuestions,
-        answers,
-        corrected: 1,
-      });
+  // I insert a useEffect to navigate to the summary page when the quiz is over
+  useEffect(() => {
+    if (ended) {
+      navigation.navigate("Summary", { quiz: quizQuestions, answers });
     }
+  }, [ended, answers]);
+
+  const handleAnswer = async () => {
+    const selected =
+      quizQuestions[currentQuestion].type === "multiple-choice"
+        ? selectedIndexes.sort((a, b) => a - b)
+        : selectedIndex;
+    const answer = {
+      index: currentQuestion,
+      selected,
+      corrected:
+        quizQuestions[currentQuestion].correct.toString() ==
+        selected.toString(),
+    };
+    setAnswers((answers) => [...answers, answer]);
+    setSelectedIndexes([]);
+    setSelectedIndex(-1);
+  };
+
+  const handleQuestions = () => {
+    //goes to the next question
+    //prevents choice from being pre-selected
+    handleAnswer();
+
+    // I added this to check if we are at the last question
+    if (currentQuestion === quizQuestions.length - 1) {
+      // I set ended to true to trigger the useEffect
+      setEnded(true);
+      return;
+    }
+    // if not, we go to the next question
+    setCurrentQuestions((question) => question + 1);
   };
 
   const reset = () => {
@@ -105,13 +116,13 @@ export default function Questions({ navigation }) {
           Question {currentQuestion + 1} out of {quizQuestions.length}
         </Text>
         <Text style={styles.questionPrompt}>
-          {quizQuestions[currentQuestion].prompt}
+          {quizQuestions[currentQuestion]?.prompt}
         </Text>
         <Text style={styles.questionType}>
-          {quizQuestions[currentQuestion].type}
+          {quizQuestions[currentQuestion]?.type}
         </Text>
         <View>
-          {quizQuestions[currentQuestion].type === "multiple-choice" ? (
+          {quizQuestions[currentQuestion]?.type === "multiple-choice" ? (
             <ButtonGroup
               selectMultiple
               buttons={quizQuestions[currentQuestion].choices}
@@ -126,7 +137,7 @@ export default function Questions({ navigation }) {
             />
           ) : (
             <ButtonGroup
-              buttons={quizQuestions[currentQuestion].choices}
+              buttons={quizQuestions[currentQuestion]?.choices}
               selectedIndex={selectedIndex}
               testID={"choices"}
               onPress={(choice) => setSelectedIndex(choice)}
@@ -141,7 +152,7 @@ export default function Questions({ navigation }) {
         <Button
           title={currentQuestion < 6 ? "Next question" : "Go to results"}
           buttonStyle={styles.Button}
-          onPress={handleQuestions}
+          onPress={async () => handleQuestions()}
           testID={"next-question"}
           onLongPress={reset}
         />

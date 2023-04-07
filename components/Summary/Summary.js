@@ -4,10 +4,8 @@ import { useMemo } from "react";
 
 export default function Summary({ route }) {
   const { quiz, answers } = route.params;
-  const corrected = useMemo(
-    () => answers.filter((item) => item.corrected).length,
-    [answers]
-  );
+  const corrected = answers.filter((item) => item.corrected).length;
+
   return (
     <View style={styles.container}>
       <ScrollView>
